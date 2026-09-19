@@ -1,75 +1,60 @@
+
 import { useState } from "react";
 import "./App.css";
 
-const initialSignals = [
+const INITIAL_SIGNALS = [
   {
-    title: "Sales decline detected",
-    description: "Transaction volume is 24% below the recent baseline.",
-    priority: "High",
-    time: "2 min ago",
+    title: "Sales performance below baseline",
+    description: "Current sales are 24% below the recent operating baseline.",
+    priority: "HIGH",
+    time: "12 min ago",
   },
   {
-    title: "Payment failure spike",
-    description: "Failed transactions increased significantly this week.",
-    priority: "High",
-    time: "6 min ago",
+    title: "Payment failures increased",
+    description: "Payment failure rate is 18% above the normal range.",
+    priority: "HIGH",
+    time: "9 min ago",
   },
   {
-    title: "Follow-up opportunity",
-    description: "12 merchant interactions require follow-up.",
-    priority: "Medium",
-    time: "18 min ago",
+    title: "Merchant follow-up overdue",
+    description: "A high-value operational follow-up has not been completed.",
+    priority: "MEDIUM",
+    time: "31 min ago",
   },
 ];
 
-const initialActions = [
+const INITIAL_ACTIONS = [
   {
     id: "ACT-7841",
     title: "Address payment failure + notify merchant",
-    category: "Payment Recovery",
-    mode: "Approval",
-    status: "Ready",
+    area: "Merchant Operations",
+    mode: "APPROVAL",
+    status: "READY",
   },
   {
-    id: "ACT-7839",
-    title: "Create merchant follow-up task",
-    category: "CRM",
-    mode: "Auto",
-    status: "Executed",
+    id: "ACT-7838",
+    title: "Create payment issue follow-up",
+    area: "Customer Experience",
+    mode: "AUTO",
+    status: "READY",
   },
   {
-    id: "ACT-7836",
-    title: "Send payment troubleshooting notification",
-    category: "Customer Experience",
-    mode: "Auto",
-    status: "Executed",
+    id: "ACT-7834",
+    title: "Flag sales recovery opportunity",
+    area: "Sales Operations",
+    mode: "AUTO",
+    status: "READY",
   },
 ];
 
-const initialActivities = [
+const INITIAL_ACTIVITIES = [
   {
-    time: "09:42:11",
-    title: "Sales decline signal detected",
-    description: "Transaction volume moved below the recent baseline.",
-    type: "Signal",
+    text: "ActionMate AI initialized the operating context.",
+    time: "Just now",
   },
   {
-    time: "09:42:12",
-    title: "Operational context analyzed",
-    description: "Transaction, merchant and analytics signals correlated.",
-    type: "AI",
-  },
-  {
-    time: "09:42:13",
-    title: "Next-best action generated",
-    description: "Payment recovery and merchant notification recommended.",
-    type: "Decision",
-  },
-  {
-    time: "09:41:48",
-    title: "Merchant follow-up task completed",
-    description: "CRM follow-up action executed successfully.",
-    type: "Action",
+    text: "Monitoring transaction, merchant and support signals.",
+    time: "Just now",
   },
 ];
 
@@ -81,759 +66,294 @@ function App() {
 
   const [approvalRequired, setApprovalRequired] = useState(false);
   const [approved, setApproved] = useState(false);
+
   const [actionExecuted, setActionExecuted] = useState(false);
   const [outcomeRecorded, setOutcomeRecorded] = useState(false);
 
-  const [actions, setActions] = useState(initialActions);
-  const [activities, setActivities] = useState(initialActivities);
+  const [actions, setActions] = useState(INITIAL_ACTIONS);
+  const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
 
-  const [aiDecisions, setAiDecisions] = useState(18);
-  const [executedCount, setExecutedCount] = useState(31);
-  const [outcomesCount, setOutcomesCount] = useState(27);
+  const [executedCount, setExecutedCount] = useState(0);
+  const [outcomesCount, setOutcomesCount] = useState(0);
 
   const [fileName, setFileName] = useState("");
   const [fileStatus, setFileStatus] = useState("");
 
-  const [outcomeMessage, setOutcomeMessage] = useState("");
+  const [outcomeMessage, setOutcomeMessage] = useState(
+    "No completed action has been measured yet."
+  );
 
-  const addActivity = (title, description, type) => {
-    const now = new Date();
+  const navigateTo = (tab) => {
+    setActiveTab(tab);
+  };
 
-    const time = now.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
-
+  const addActivity = (text) => {
     setActivities((current) => [
       {
-        time,
-        title,
-        description,
-        type,
+        text,
+        time: "Just now",
       },
       ...current,
     ]);
   };
 
+  /*
+   * STEP 1 → STEP 2 → STEP 3
+   * Understand → Decide → Approval Required
+   */
   const simulateWorkflow = () => {
     if (workflowRunning) return;
 
     setActiveTab("command");
-    setWorkflowRunning(true);
 
+    setWorkflowRunning(true);
     setWorkflowStep(1);
+
     setApprovalRequired(false);
     setApproved(false);
+
     setActionExecuted(false);
     setOutcomeRecorded(false);
-    setOutcomeMessage("");
 
-    addActivity(
-      "Signal detected",
-      "Sales are 24% below the recent baseline while payment failures increased.",
-      "Signal"
-    );
+    setOutcomeMessage("Action is being evaluated.");
 
-    setTimeout(() => {
+    addActivity("AI teammate started a new decision workflow.");
+
+    window.setTimeout(() => {
       setWorkflowStep(2);
-      setAiDecisions((current) => current + 1);
 
       addActivity(
-        "Context analyzed",
-        "Transaction, merchant, support and analytics context correlated.",
-        "AI"
+        "AI correlated sales performance and payment failure signals."
       );
     }, 1000);
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       setWorkflowStep(3);
+
       setApprovalRequired(true);
       setWorkflowRunning(false);
 
       addActivity(
-        "Recommendation generated",
-        "ActionMate recommends addressing payment failure and notifying the merchant.",
-        "Decision"
+        "Approval required before the proposed action can execute."
       );
     }, 2000);
   };
 
+  /*
+   * APPROVAL
+   */
   const approveAction = () => {
-    setApproved(true);
     setApprovalRequired(false);
+    setApproved(true);
     setWorkflowStep(3);
 
-    addActivity(
-      "Human approval received",
-      "Authorized operator approved the recommended payment recovery action.",
-      "Approval"
-    );
+    addActivity("Human approval granted for ACT-7841.");
   };
 
+  /*
+   * EXECUTION → OUTCOME
+   */
   const runAction = () => {
-    if (actionExecuted) return;
+    if (actionExecuted || workflowRunning) return;
 
     if (approvalRequired && !approved) {
       setActiveTab("approvals");
       return;
     }
 
+    if (!approved && workflowStep === 0) {
+      setActiveTab("command");
+
+      addActivity(
+        "Action execution is waiting for the AI workflow."
+      );
+
+      return;
+    }
+
     setWorkflowRunning(true);
     setWorkflowStep(4);
+
+    addActivity("ACT-7841 execution started.");
 
     setActions((current) =>
       current.map((action) =>
         action.id === "ACT-7841"
-          ? { ...action, status: "Executed" }
+          ? {
+              ...action,
+              status: "EXECUTED",
+            }
           : action
       )
     );
 
-    setExecutedCount((current) => current + 1);
+    setExecutedCount((count) => count + 1);
     setActionExecuted(true);
 
-    addActivity(
-      "Action executed",
-      "Payment recovery notification was executed after human approval.",
-      "Action"
-    );
-
-    setTimeout(() => {
+    window.setTimeout(() => {
       setWorkflowStep(5);
+
       setWorkflowRunning(false);
       setOutcomeRecorded(true);
-      setOutcomesCount((current) => current + 1);
+
+      setOutcomesCount((count) => count + 1);
 
       setOutcomeMessage(
-        "Action completed successfully. Outcome tracking has started."
+        "Execution completed. Outcome tracking is now active for ACT-7841."
       );
 
       addActivity(
-        "Outcome tracking started",
-        "The action is now traceable for recovery and business impact measurement.",
-        "Outcome"
+        "ACT-7841 executed successfully; outcome tracking started."
       );
     }, 1000);
   };
 
+  /*
+   * RESET
+   */
   const resetWorkflow = () => {
     setWorkflowStep(0);
     setWorkflowRunning(false);
+
     setApprovalRequired(false);
     setApproved(false);
+
     setActionExecuted(false);
     setOutcomeRecorded(false);
-    setOutcomeMessage("");
 
-    setActions(initialActions);
+    setActions(INITIAL_ACTIONS);
 
-    addActivity(
-      "Workflow reset",
-      "ActionMate is ready for another operational workflow.",
-      "System"
+    setOutcomeMessage(
+      "No completed action has been measured yet."
     );
+
+    addActivity("Workflow state was reset by the operator.");
+
+    setActiveTab("command");
   };
 
+  /*
+   * DATA INTELLIGENCE UPLOAD
+   */
   const handleFileUpload = (event) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
-    const validType =
-      file.name.toLowerCase().endsWith(".csv") ||
-      file.name.toLowerCase().endsWith(".json");
+    const lowerName = file.name.toLowerCase();
 
-    if (!validType) {
-      setFileStatus("Please upload a CSV or JSON dataset.");
+    const valid =
+      lowerName.endsWith(".csv") ||
+      lowerName.endsWith(".json");
+
+    if (!valid) {
       setFileName("");
+      setFileStatus("Upload a CSV or JSON file.");
+
+      addActivity(
+        "Data upload rejected: unsupported file type."
+      );
+
+      event.target.value = "";
+
       return;
     }
 
     setFileName(file.name);
-    setFileStatus("Dataset received · Demo analysis ready");
+
+    setFileStatus(
+      "File received. Intelligence pipeline ready."
+    );
 
     addActivity(
-      "Dataset received",
-      `${file.name} is ready for synthetic operational analysis.`,
-      "Data"
+      `Dataset uploaded to Data Intelligence: ${file.name}.`
     );
+
+    event.target.value = "";
   };
 
-  const renderWorkflowStatus = () => {
-    if (workflowStep === 0) {
+  /*
+   * WORKFLOW STATUS
+   */
+  const getWorkflowStatus = () => {
+    if (outcomeRecorded) {
       return {
-        label: "Ready to analyze",
-        className: "ready",
-      };
-    }
-
-    if (workflowStep === 1) {
-      return {
-        label: "AI teammate understanding context",
-        className: "working",
-      };
-    }
-
-    if (workflowStep === 2) {
-      return {
-        label: "AI teammate making a decision",
-        className: "working",
-      };
-    }
-
-    if (workflowStep === 3 && approvalRequired) {
-      return {
-        label: "Waiting for human approval",
-        className: "approval",
-      };
-    }
-
-    if (workflowStep === 3 && approved) {
-      return {
-        label: "Approved · Ready to execute",
-        className: "approval",
-      };
-    }
-
-    if (workflowStep === 4) {
-      return {
-        label: "Executing approved action",
-        className: "working",
-      };
-    }
-
-    if (workflowStep === 5) {
-      return {
-        label: "Outcome recorded",
+        label: "SUCCESS",
         className: "success",
       };
     }
 
+    if (approvalRequired) {
+      return {
+        label: "APPROVAL REQUIRED",
+        className: "approval",
+      };
+    }
+
+    if (workflowRunning) {
+      return {
+        label: "WORKING",
+        className: "working",
+      };
+    }
+
+    if (approved) {
+      return {
+        label: "APPROVED",
+        className: "working",
+      };
+    }
+
     return {
-      label: "Ready to analyze",
+      label: "READY",
       className: "ready",
     };
   };
 
-  const workflowStatus = renderWorkflowStatus();
+  const status = getWorkflowStatus();
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">A</div>
-
-          <div>
-            <div className="brand-name">ACTIONMATE</div>
-            <div className="brand-subtitle">
-              AI OPERATIONS
-              <br />
-              PLATFORM
-            </div>
-          </div>
-        </div>
-
-        <div className="sidebar-section-label">WORKSPACE</div>
-
-        <nav className="sidebar-nav">
-          <NavItem
-            label="Command Center"
-            active={activeTab === "command"}
-            onClick={() => setActiveTab("command")}
-            icon="⌘"
-          />
-
-          <NavItem
-            label="Signals"
-            active={activeTab === "signals"}
-            onClick={() => setActiveTab("signals")}
-            icon="◉"
-            badge="4"
-          />
-
-          <NavItem
-            label="Actions"
-            active={activeTab === "actions"}
-            onClick={() => setActiveTab("actions")}
-            icon="↗"
-          />
-
-          <NavItem
-            label="Approvals"
-            active={activeTab === "approvals"}
-            onClick={() => setActiveTab("approvals")}
-            icon="✓"
-          />
-
-          <NavItem
-            label="Data Intelligence"
-            active={activeTab === "data"}
-            onClick={() => setActiveTab("data")}
-            icon="◈"
-          />
-
-          <NavItem
-            label="Activity"
-            active={activeTab === "activity"}
-            onClick={() => setActiveTab("activity")}
-            icon="≡"
-          />
-
-          <NavItem
-            label="Outcomes"
-            active={activeTab === "outcomes"}
-            onClick={() => setActiveTab("outcomes")}
-            icon="↗"
-          />
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="environment-card">
-            <div className="environment-dot" />
-
-            <div>
-              <div className="environment-title">DEMO ENVIRONMENT</div>
-              <div className="environment-text">Synthetic data</div>
-            </div>
-          </div>
-
-          <div className="sidebar-footer">
-            ActionMate AI
-            <span>v0.1 Demo</span>
-          </div>
-        </div>
-      </aside>
+      <Sidebar
+        activeTab={activeTab}
+        onNavigate={navigateTo}
+      />
 
       <main className="main-content">
-        <header className="topbar">
-          <div className="topbar-left">
-            <span className="topbar-label">PAYTM</span>
-            <span className="topbar-divider">/</span>
-            <span>Autonomous Operations</span>
-          </div>
-
-          <div className="topbar-right">
-            <div className="live-status">
-              <span className="live-dot" />
-              AI teammate active
-            </div>
-
-            <div className="user-avatar">RV</div>
-          </div>
-        </header>
+        <Topbar />
 
         {activeTab === "command" && (
-          <>
-            <section className="page-header">
-              <div>
-                <div className="eyebrow">OPERATIONS / AI COMMAND CENTER</div>
-
-                <h1>Merchant Operations</h1>
-
-                <p>
-                  Resolve high-impact operational issues through continuous
-                  signal detection and controlled AI execution.
-                </p>
-              </div>
-
-              <div className={`header-status ${workflowStatus.className}`}>
-                <span className="status-dot" />
-                {workflowStatus.label}
-              </div>
-            </section>
-
-            <section className="kpi-grid">
-              <MiniKPI
-                label="ACTIVE SIGNALS"
-                value="04"
-                meta="↑ 2 detected today"
-              />
-
-              <MiniKPI
-                label="AI DECISIONS"
-                value={aiDecisions}
-                meta="Across 6 operational areas"
-              />
-
-              <MiniKPI
-                label="ACTIONS EXECUTED"
-                value={executedCount}
-                meta="87% completed successfully"
-              />
-
-              <MiniKPI
-                label="OUTCOMES TRACKED"
-                value={outcomesCount}
-                meta="Every action traceable"
-              />
-            </section>
-
-            <section className="command-workspace">
-              <div className="workflow-card">
-                <div className="card-header">
-                  <div>
-                    <div className="card-eyebrow">FEATURED WORKFLOW</div>
-                    <h2>Payment Recovery</h2>
-                  </div>
-
-                  <span className="priority-badge">HIGH PRIORITY</span>
-                </div>
-
-                <div className="workflow-intro">
-                  <div className="signal-indicator">
-                    <span className="signal-dot" />
-                    <span>Signal detected</span>
-                  </div>
-
-                  <p>
-                    Sales are down 24% versus the recent baseline while payment
-                    failures have increased.
-                  </p>
-                </div>
-
-                <div className="workflow">
-                  <WorkflowStep
-                    number="01"
-                    title="UNDERSTAND"
-                    text={
-                      workflowStep >= 1
-                        ? "Context analyzed"
-                        : "Read business context"
-                    }
-                    active={workflowStep === 1}
-                    complete={workflowStep > 1}
-                  />
-
-                  <WorkflowStep
-                    number="02"
-                    title="DECIDE"
-                    text={
-                      workflowStep >= 2
-                        ? "Next-best action selected"
-                        : "Choose next-best action"
-                    }
-                    active={workflowStep === 2}
-                    complete={workflowStep > 2}
-                  />
-
-                  <WorkflowStep
-                    number="03"
-                    title="ACT"
-                    text={
-                      actionExecuted
-                        ? "Action executed"
-                        : approved
-                        ? "Approved for execution"
-                        : "Execute approved work"
-                    }
-                    active={workflowStep === 3 || workflowStep === 4}
-                    complete={workflowStep > 4}
-                  />
-
-                  <WorkflowStep
-                    number="04"
-                    title="MEASURE"
-                    text={
-                      outcomeRecorded
-                        ? "Outcome recorded"
-                        : "Track business outcome"
-                    }
-                    active={workflowStep === 5}
-                    complete={workflowStep === 5}
-                  />
-                </div>
-
-                <div className="decision-panel">
-                  <div className="decision-top">
-                    <div>
-                      <div className="decision-label">ACTIONMATE DECISION</div>
-
-                      <div className="confidence">
-                        <span className="ai-pulse" />
-                        94% confidence
-                      </div>
-                    </div>
-
-                    <div className="decision-stage">
-                      {workflowStep === 1 && "UNDERSTANDING"}
-                      {workflowStep === 2 && "DECIDING"}
-                      {workflowStep === 3 && "APPROVAL"}
-                      {workflowStep === 4 && "EXECUTING"}
-                      {workflowStep === 5 && "MEASURING"}
-                      {workflowStep === 0 && "READY"}
-                    </div>
-                  </div>
-
-                  <h3>Address payment failure + notify merchant</h3>
-
-                  <p className="decision-reasoning">
-                    Transaction failure patterns correlate with the observed
-                    sales decline. ActionMate recommends addressing payment
-                    friction and notifying the affected merchant.
-                  </p>
-
-                  <div className="reasoning-trail">
-                    <div className="reasoning-title">WHY THIS ACTION?</div>
-
-                    <div className="reasoning-item">
-                      <span>01</span>
-                      <div>
-                        <strong>Signal correlation</strong>
-                        <p>
-                          Sales are 24% below baseline while payment failures
-                          increased by 18%.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="reasoning-item">
-                      <span>02</span>
-                      <div>
-                        <strong>Context check</strong>
-                        <p>
-                          Transaction and analytics signals point toward
-                          payment friction as the immediate issue.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="reasoning-item">
-                      <span>03</span>
-                      <div>
-                        <strong>Recommended response</strong>
-                        <p>
-                          Address payment friction and notify the affected
-                          merchant before broader intervention.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="decision-actions">
-                    <button
-                      className="primary-button"
-                      onClick={runAction}
-                      disabled={
-                        workflowRunning ||
-                        (approvalRequired && !approved) ||
-                        actionExecuted
-                      }
-                    >
-                      {outcomeRecorded
-                        ? "Action Completed"
-                        : actionExecuted
-                        ? "Action Executed"
-                        : approved
-                        ? "Execute Approved Action"
-                        : approvalRequired
-                        ? "Approval Required"
-                        : "Execute Action"}
-                    </button>
-
-                    <button
-                      className="secondary-button"
-                      onClick={simulateWorkflow}
-                      disabled={workflowRunning}
-                    >
-                      {workflowRunning
-                        ? "AI Teammate Working..."
-                        : "Simulate AI Workflow"}
-                    </button>
-
-                    {workflowStep > 0 && (
-                      <button
-                        className="secondary-button reset-button"
-                        onClick={resetWorkflow}
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-
-                  {approvalRequired && !approved && (
-                    <div className="workflow-notice">
-                      <strong>Human approval required.</strong>
-                      <span>
-                        This action is classified as an important operational
-                        decision.
-                      </span>
-
-                      <button
-                        className="inline-action"
-                        onClick={approveAction}
-                      >
-                        Review & Approve
-                      </button>
-                    </div>
-                  )}
-
-                  {approved && !actionExecuted && (
-                    <div className="workflow-notice approval-notice">
-                      <strong>Approval received.</strong>
-                      <span>
-                        ActionMate is ready to execute the authorized action.
-                      </span>
-                    </div>
-                  )}
-
-                  {outcomeRecorded && (
-                    <div className="workflow-success">
-                      <div className="success-mark">✓</div>
-
-                      <div>
-                        <strong>ACTION COMPLETED</strong>
-                        <p>
-                          Payment recovery notification executed successfully.
-                          Outcome tracking has started.
-                        </p>
-                      </div>
-
-                      <div className="outcome-tag">TRACKING</div>
-                    </div>
-                  )}
-
-                  <div className="decision-metrics">
-                    <div>
-                      <span>Sales variance</span>
-                      <strong>-24%</strong>
-                    </div>
-
-                    <div>
-                      <span>Failure trend</span>
-                      <strong>+18%</strong>
-                    </div>
-
-                    <div>
-                      <span>Priority</span>
-                      <strong>High</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <aside className="context-panel">
-                <div className="context-header">
-                  <div>
-                    <div className="card-eyebrow">AI TEAMMATE</div>
-                    <h3>Context understood</h3>
-                  </div>
-
-                  <span className="online-label">
-                    <span className="online-dot" />
-                    ONLINE
-                  </span>
-                </div>
-
-                <p className="context-description">
-                  ActionMate combines operational signals before recommending
-                  and executing an action.
-                </p>
-
-                <div className="context-list">
-                  <ContextItem
-                    label="TRANSACTIONS"
-                    value="Payment success / failure"
-                    active={workflowStep >= 1}
-                  />
-
-                  <ContextItem
-                    label="MERCHANT"
-                    value="Profile, segment, history"
-                    active={workflowStep >= 1}
-                  />
-
-                  <ContextItem
-                    label="SUPPORT + CRM"
-                    value="Cases and complaints"
-                    active={workflowStep >= 1}
-                  />
-
-                  <ContextItem
-                    label="ANALYTICS"
-                    value="Signals and trends"
-                    active={workflowStep >= 1}
-                  />
-                </div>
-
-                <div className="policy-box">
-                  <div className="policy-title">EXECUTION POLICY</div>
-
-                  <div className="policy-row">
-                    <span className="policy-dot auto" />
-                    <div>
-                      <strong>AUTO</strong>
-                      <span>Routine work</span>
-                    </div>
-                  </div>
-
-                  <div className="policy-row">
-                    <span className="policy-dot approval" />
-                    <div>
-                      <strong>APPROVAL</strong>
-                      <span>Important decisions</span>
-                    </div>
-                  </div>
-
-                  <div className="policy-row">
-                    <span className="policy-dot escalate" />
-                    <div>
-                      <strong>ESCALATE</strong>
-                      <span>Expert judgment</span>
-                    </div>
-                  </div>
-                </div>
-              </aside>
-            </section>
-
-            <section className="bottom-grid">
-              <PageSection
-                title="LATEST SIGNALS"
-                eyebrow="What ActionMate sees"
-                button="View all →"
-                onClick={() => setActiveTab("signals")}
-              >
-                <div className="signal-list">
-                  {initialSignals.map((signal) => (
-                    <SignalRow key={signal.title} {...signal} />
-                  ))}
-                </div>
-              </PageSection>
-
-              <PageSection
-                title="ACTION QUEUE"
-                eyebrow="Next-best actions"
-                button="View all →"
-                onClick={() => setActiveTab("actions")}
-              >
-                <div className="action-list">
-                  {actions.map((action) => (
-                    <ActionRow key={action.id} {...action} />
-                  ))}
-                </div>
-              </PageSection>
-            </section>
-
-            <div className="demo-disclaimer">
-              Hackathon concept · Synthetic data · Not connected to Paytm
-              production systems
-            </div>
-          </>
+          <CommandCenter
+            workflowStep={workflowStep}
+            workflowRunning={workflowRunning}
+            approvalRequired={approvalRequired}
+            approved={approved}
+            actionExecuted={actionExecuted}
+            outcomeRecorded={outcomeRecorded}
+            status={status}
+            executedCount={executedCount}
+            outcomesCount={outcomesCount}
+            actions={actions}
+            onRunAction={runAction}
+            onSimulate={simulateWorkflow}
+            onApprove={approveAction}
+            onReset={resetWorkflow}
+            onNavigate={navigateTo}
+          />
         )}
 
         {activeTab === "signals" && (
           <SignalsPage
-            signals={initialSignals}
-            onBack={() => setActiveTab("command")}
+            signals={INITIAL_SIGNALS}
+            onNavigate={navigateTo}
           />
         )}
 
         {activeTab === "actions" && (
           <ActionsPage
             actions={actions}
-            onBack={() => setActiveTab("command")}
-            onExecute={() => setActiveTab("approvals")}
+            onRunAction={runAction}
+            onNavigate={navigateTo}
           />
         )}
 
@@ -841,9 +361,10 @@ function App() {
           <ApprovalsPage
             approvalRequired={approvalRequired}
             approved={approved}
+            actionExecuted={actionExecuted}
             onApprove={approveAction}
-            onExecute={runAction}
-            onBack={() => setActiveTab("command")}
+            onRunAction={runAction}
+            onSimulate={simulateWorkflow}
           />
         )}
 
@@ -852,22 +373,21 @@ function App() {
             fileName={fileName}
             fileStatus={fileStatus}
             onUpload={handleFileUpload}
-            onBack={() => setActiveTab("command")}
           />
         )}
 
         {activeTab === "activity" && (
           <ActivityPage
             activities={activities}
-            onBack={() => setActiveTab("command")}
           />
         )}
 
         {activeTab === "outcomes" && (
           <OutcomesPage
             outcomeRecorded={outcomeRecorded}
+            executedCount={executedCount}
             outcomesCount={outcomesCount}
-            onBack={() => setActiveTab("command")}
+            outcomeMessage={outcomeMessage}
           />
         )}
       </main>
@@ -875,527 +395,1609 @@ function App() {
   );
 }
 
-function NavItem({ label, active, onClick, icon, badge }) {
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+function Sidebar({
+  activeTab,
+  onNavigate,
+}) {
+  return (
+    <aside className="sidebar">
+      <div className="brand">
+        <div className="brand-mark">
+          A
+        </div>
+
+        <div>
+          <div className="brand-name">
+            ACTIONMATE AI
+          </div>
+
+          <div className="brand-subtitle">
+            AUTONOMOUS OPERATIONS
+          </div>
+        </div>
+      </div>
+
+      <div className="environment-card">
+        <span className="environment-label">
+          ENVIRONMENT
+        </span>
+
+        <div className="environment-row">
+          <span className="status-dot"></span>
+          Hackathon Sandbox
+        </div>
+
+        <div className="environment-version">
+          v1.0 • Synthetic data
+        </div>
+      </div>
+
+      <nav className="sidebar-nav">
+        <NavItem
+          label="Command Center"
+          active={activeTab === "command"}
+          onClick={() => onNavigate("command")}
+        />
+
+        <NavItem
+          label="Signals"
+          active={activeTab === "signals"}
+          onClick={() => onNavigate("signals")}
+          count={3}
+        />
+
+        <NavItem
+          label="Action Queue"
+          active={activeTab === "actions"}
+          onClick={() => onNavigate("actions")}
+        />
+
+        <NavItem
+          label="Approvals"
+          active={activeTab === "approvals"}
+          onClick={() => onNavigate("approvals")}
+          count={1}
+        />
+
+        <NavItem
+          label="Data Intelligence"
+          active={activeTab === "data"}
+          onClick={() => onNavigate("data")}
+        />
+
+        <NavItem
+          label="Activity"
+          active={activeTab === "activity"}
+          onClick={() => onNavigate("activity")}
+        />
+
+        <NavItem
+          label="Outcomes"
+          active={activeTab === "outcomes"}
+          onClick={() => onNavigate("outcomes")}
+        />
+      </nav>
+
+      <div className="sidebar-footer">
+        <div className="footer-label">
+          GOVERNANCE
+        </div>
+
+        <div className="footer-value">
+          Human oversight enabled
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function NavItem({
+  label,
+  active,
+  onClick,
+  count,
+}) {
   return (
     <button
-      className={`nav-item ${active ? "active" : ""}`}
+      type="button"
+      className={`nav-item ${
+        active ? "active" : ""
+      }`}
       onClick={onClick}
     >
-      <span className="nav-icon">{icon}</span>
       <span>{label}</span>
 
-      {badge && <span className="nav-badge">{badge}</span>}
+      {count ? (
+        <span className="nav-count">
+          {count}
+        </span>
+      ) : null}
     </button>
   );
 }
 
-function WorkflowStep({ number, title, text, active, complete }) {
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+function Topbar() {
+  return (
+    <header className="topbar">
+      <div>
+        <div className="topbar-brand">
+          PAYTM ACTIONMATE AI
+        </div>
+
+        <div className="topbar-title">
+          AI teammates for the next generation of payments
+        </div>
+      </div>
+
+      <div className="topbar-right">
+        <div className="ai-status">
+          <span className="status-dot"></span>
+          AI teammate online
+        </div>
+
+        <div className="profile-circle">
+          RV
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* =========================================================
+   COMMAND CENTER
+========================================================= */
+
+function CommandCenter({
+  workflowStep,
+  workflowRunning,
+  approvalRequired,
+  approved,
+  actionExecuted,
+  outcomeRecorded,
+  status,
+  executedCount,
+  outcomesCount,
+  actions,
+  onRunAction,
+  onSimulate,
+  onApprove,
+  onReset,
+  onNavigate,
+}) {
+  return (
+    <div className="page">
+      <PageHeader
+        eyebrow="COMMAND CENTER"
+        title="AI Operations Command Center"
+        description="ActionMate AI understands operating context, makes a decision, executes approved work and measures the resulting outcome."
+      />
+
+      <div className="command-status-row">
+        <div>
+          <span className="status-indicator"></span>
+          Live operating context
+        </div>
+
+        <span
+          className={`workflow-status ${status.className}`}
+        >
+          {status.label}
+        </span>
+      </div>
+
+      <div className="kpi-grid">
+        <MiniKPI
+          label="ACTIVE SIGNALS"
+          value="03"
+          detail="Across payments and operations"
+        />
+
+        <MiniKPI
+          label="AI DECISIONS"
+          value={workflowStep >= 2 ? "01" : "00"}
+          detail="Context-aware recommendations"
+        />
+
+        <MiniKPI
+          label="EXECUTED ACTIONS"
+          value={String(executedCount).padStart(2, "0")}
+          detail="Approved autonomous work"
+        />
+
+        <MiniKPI
+          label="OUTCOMES TRACKED"
+          value={String(outcomesCount).padStart(2, "0")}
+          detail="Measured after execution"
+        />
+      </div>
+
+      <section className="workflow-card">
+        <div className="card-header">
+          <div>
+            <div className="card-eyebrow">
+              LIVE WORKFLOW
+            </div>
+
+            <div className="card-title-row">
+              <h2>
+                Merchant sales recovery
+              </h2>
+
+              <span className="priority-badge">
+                HIGH PRIORITY
+              </span>
+            </div>
+
+            <p className="card-description">
+              AI detected a meaningful sales deviation
+              and correlated it with an increase in
+              payment failures.
+            </p>
+          </div>
+
+          <div className="signal-label">
+            <span className="signal-dot"></span>
+            2 correlated signals
+          </div>
+        </div>
+
+        <div className="workflow">
+          <WorkflowStep
+            number="01"
+            title="UNDERSTAND"
+            text="Read transaction and operating signals."
+            active={workflowStep >= 1}
+            complete={workflowStep > 1}
+          />
+
+          <WorkflowStep
+            number="02"
+            title="DECIDE"
+            text="Select the highest-value next action."
+            active={workflowStep >= 2}
+            complete={workflowStep > 2}
+          />
+
+          <WorkflowStep
+            number="03"
+            title="ACT"
+            text="Apply governance before execution."
+            active={workflowStep >= 3}
+            complete={workflowStep > 4}
+          />
+
+          <WorkflowStep
+            number="04"
+            title="MEASURE"
+            text="Track whether the action changed the outcome."
+            active={workflowStep >= 5}
+            complete={workflowStep >= 5}
+          />
+        </div>
+      </section>
+
+      <div className="workspace-grid">
+        <DecisionCard
+          workflowStep={workflowStep}
+          workflowRunning={workflowRunning}
+          approvalRequired={approvalRequired}
+          approved={approved}
+          actionExecuted={actionExecuted}
+          outcomeRecorded={outcomeRecorded}
+          onRunAction={onRunAction}
+          onApprove={onApprove}
+          onSimulate={onSimulate}
+          onReset={onReset}
+        />
+
+        <ContextCard />
+      </div>
+
+      <div className="bottom-grid">
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <div className="card-eyebrow">
+                DETECTION
+              </div>
+
+              <h3>
+                Live signals
+              </h3>
+            </div>
+
+            <button
+              type="button"
+              className="small-button"
+              onClick={() => onNavigate("signals")}
+            >
+              View all
+            </button>
+          </div>
+
+          <div className="signal-list">
+            <SignalRow
+              title="Sales performance below baseline"
+              description="Sales are 24% below the recent baseline."
+              priority="HIGH"
+              time="12 min"
+            />
+
+            <SignalRow
+              title="Payment failures increased"
+              description="Failure rate is 18% above normal."
+              priority="HIGH"
+              time="9 min"
+            />
+
+            <SignalRow
+              title="Merchant follow-up overdue"
+              description="Operational follow-up is pending."
+              priority="MEDIUM"
+              time="31 min"
+            />
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <div className="card-eyebrow">
+                EXECUTION
+              </div>
+
+              <h3>
+                Action queue
+              </h3>
+            </div>
+
+            <button
+              type="button"
+              className="small-button"
+              onClick={() => onNavigate("actions")}
+            >
+              View all
+            </button>
+          </div>
+
+          <div className="action-list">
+            {actions.map((action) => (
+              <ActionRow
+                key={action.id}
+                action={action}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="disclaimer">
+        Hackathon prototype using synthetic operating data;
+        not connected to Paytm production systems.
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   DECISION CARD
+========================================================= */
+
+function DecisionCard({
+  workflowStep,
+  workflowRunning,
+  approvalRequired,
+  approved,
+  actionExecuted,
+  outcomeRecorded,
+  onRunAction,
+  onApprove,
+  onSimulate,
+  onReset,
+}) {
+  const canExecute =
+    approved &&
+    !actionExecuted &&
+    !workflowRunning &&
+    !approvalRequired;
+
+  return (
+    <section className="decision-card">
+      <div className="decision-header">
+        <div>
+          <div className="card-eyebrow">
+            AI DECISION
+          </div>
+
+          <h2>
+            Address payment failure + notify merchant
+          </h2>
+
+          <div className="decision-meta">
+            <span className="decision-ready">
+              {outcomeRecorded
+                ? "OUTCOME TRACKING"
+                : approved
+                ? "APPROVED"
+                : approvalRequired
+                ? "AWAITING APPROVAL"
+                : "RECOMMENDED"}
+            </span>
+
+            <span>
+              ACT-7841
+            </span>
+
+            <span>
+              Merchant Operations
+            </span>
+          </div>
+        </div>
+
+        <div className="confidence-box">
+          <strong>
+            91%
+          </strong>
+
+          <span>
+            confidence
+          </span>
+        </div>
+      </div>
+
+      <div className="reasoning-section">
+        <div className="section-label">
+          WHY THIS ACTION
+        </div>
+
+        <div className="reasoning-list">
+          <ReasoningItem
+            number="01"
+            title="Sales are 24% below baseline"
+            text="The deviation is large enough to warrant intervention."
+          />
+
+          <ReasoningItem
+            number="02"
+            title="Payment failures are 18% higher"
+            text="The failure increase provides a plausible operational driver."
+          />
+
+          <ReasoningItem
+            number="03"
+            title="Merchant notification is actionable"
+            text="The proposed action addresses the signal while preserving human oversight."
+          />
+        </div>
+      </div>
+
+      <div className="decision-actions">
+        <button
+          type="button"
+          className="primary-button"
+          onClick={onRunAction}
+          disabled={!canExecute}
+        >
+          {actionExecuted
+            ? "Action Executed"
+            : workflowRunning
+            ? "Working..."
+            : "Execute Action"}
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={onSimulate}
+          disabled={workflowRunning}
+        >
+          Simulate AI Workflow
+        </button>
+
+        <button
+          type="button"
+          className="text-button"
+          onClick={onReset}
+        >
+          Reset
+        </button>
+      </div>
+
+      {approvalRequired && !approved && (
+        <div className="approval-notice">
+          <div>
+            <strong>
+              Human approval required
+            </strong>
+
+            <p>
+              This action can affect merchant
+              operations, so ActionMate AI has paused
+              before execution.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="approval-button"
+            onClick={onApprove}
+          >
+            Approve Action
+          </button>
+        </div>
+      )}
+
+      {approved && !actionExecuted && (
+        <div className="approval-notice">
+          <div>
+            <strong>
+              Action approved
+            </strong>
+
+            <p>
+              Governance checks are complete. The
+              approved action is ready to execute.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="approval-button"
+            onClick={onRunAction}
+          >
+            Execute Now
+          </button>
+        </div>
+      )}
+
+      {actionExecuted && (
+        <div className="success-notice">
+          <div>
+            <strong>
+              {outcomeRecorded
+                ? "Outcome tracking started"
+                : "Action executed"}
+            </strong>
+
+            <p>
+              {outcomeRecorded
+                ? "ACT-7841 completed successfully and its business outcome is now being measured."
+                : "ACT-7841 completed successfully."}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="decision-metrics">
+        <div>
+          <span>
+            EXPECTED RESPONSE
+          </span>
+
+          <strong>
+            &lt; 5 min
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            GOVERNANCE
+          </span>
+
+          <strong>
+            Human approval
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            WORKFLOW STATE
+          </span>
+
+          <strong>
+            {workflowStep >= 5
+              ? "Measured"
+              : "In progress"}
+          </strong>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================
+   AI TEAMMATE CONTEXT
+========================================================= */
+
+function ContextCard() {
+  return (
+    <section className="context-card">
+      <div className="card-eyebrow">
+        AI TEAMMATE
+      </div>
+
+      <div className="context-heading">
+        <h2>
+          ActionMate AI
+        </h2>
+
+        <div className="online-badge">
+          <span className="status-dot"></span>
+          ONLINE
+        </div>
+      </div>
+
+      <p className="context-description">
+        The teammate combines operating context,
+        business rules and recent activity before
+        recommending an action.
+      </p>
+
+      <div className="context-sources">
+        <ContextItem text="Transaction signals" />
+        <ContextItem text="Merchant profile" />
+        <ContextItem text="Support context" />
+        <ContextItem text="Operational analytics" />
+      </div>
+
+      <div className="policy-section">
+        <div className="section-label">
+          GOVERNANCE MODE
+        </div>
+
+        <div className="governance-list">
+          <GovernanceItem
+            title="AUTO"
+            text="Routine, low-risk operational actions."
+          />
+
+          <GovernanceItem
+            title="APPROVAL"
+            text="Important decisions pause for human review."
+            active
+          />
+
+          <GovernanceItem
+            title="ESCALATE"
+            text="Sensitive cases are routed to expert judgment."
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================
+   WORKFLOW
+========================================================= */
+
+function WorkflowStep({
+  number,
+  title,
+  text,
+  active,
+  complete,
+}) {
   return (
     <div
       className={`workflow-step ${
         active ? "active" : ""
-      } ${complete ? "complete" : ""}`}
+      } ${
+        complete ? "completed" : ""
+      }`}
     >
-      <div className="step-number">{complete ? "✓" : number}</div>
+      <div className="workflow-step-number">
+        {complete ? "✓" : number}
+      </div>
 
-      <div>
-        <strong>{title}</strong>
-        <span>{text}</span>
+      <div className="workflow-line"></div>
+
+      <div className="workflow-step-title">
+        {title}
+      </div>
+
+      <div className="workflow-step-description">
+        {text}
       </div>
     </div>
   );
 }
 
-function ContextItem({ label, value, active }) {
+/* =========================================================
+   SMALL COMPONENTS
+========================================================= */
+
+function ReasoningItem({
+  number,
+  title,
+  text,
+}) {
+  return (
+    <div className="reasoning-item">
+      <span>
+        {number}
+      </span>
+
+      <div>
+        <strong>
+          {title}
+        </strong>
+
+        <p>
+          {text}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ContextItem({ text }) {
   return (
     <div className="context-item">
-      <div className={`context-check ${active ? "active" : ""}`}>✓</div>
+      <span className="context-check">
+        ✓
+      </span>
 
-      <div>
-        <span>{label}</span>
-        <strong>{value}</strong>
+      {text}
+    </div>
+  );
+}
+
+function GovernanceItem({
+  title,
+  text,
+  active = false,
+}) {
+  return (
+    <div
+      className={`governance-item ${
+        active ? "active" : ""
+      }`}
+    >
+      <div className="governance-title">
+        {title}
+      </div>
+
+      <div className="governance-text">
+        {text}
       </div>
     </div>
   );
 }
 
-function SignalRow({ title, description, priority, time }) {
+function SignalRow({
+  title,
+  description,
+  priority,
+  time,
+}) {
   return (
     <div className="signal-row">
-      <div className="signal-icon" />
-
-      <div className="signal-row-content">
-        <strong>{title}</strong>
-
-        <p>{description}</p>
-
-        <div className="signal-row-meta">
-          <span className={`priority-text ${priority.toLowerCase()}`}>
-            {priority}
-          </span>
-
-          <span>{time}</span>
+      <div className="signal-row-main">
+        <div className="signal-row-title">
+          {title}
         </div>
+
+        <div className="signal-row-description">
+          {description}
+        </div>
+      </div>
+
+      <div className="signal-row-right">
+        <span
+          className={`priority ${priority.toLowerCase()}`}
+        >
+          {priority}
+        </span>
+
+        <span className="row-time">
+          {time}
+        </span>
       </div>
     </div>
   );
 }
 
-function ActionRow({ title, category, mode, status }) {
+function ActionRow({ action }) {
+  const isExecuted =
+    action.status.toLowerCase() === "executed";
+
   return (
     <div className="action-row">
-      <div>
-        <strong>{title}</strong>
+      <div className="action-row-main">
+        <div className="action-id">
+          {action.id}
+        </div>
 
-        <div className="action-row-meta">
-          <span>{category}</span>
-          <span>{mode}</span>
+        <div className="action-title">
+          {action.title}
+        </div>
+
+        <div className="action-area">
+          {action.area}
         </div>
       </div>
 
-      <span
-        className={`status-pill ${
-          status.toLowerCase() === "executed" ? "success" : "ready"
-        }`}
-      >
-        {status}
-      </span>
+      <div className="action-row-right">
+        <span className="action-mode">
+          {action.mode}
+        </span>
+
+        <span
+          className={`action-status ${
+            isExecuted
+              ? "executed"
+              : "ready"
+          }`}
+        >
+          {action.status}
+        </span>
+      </div>
     </div>
   );
 }
 
-function PageSection({ title, eyebrow, button, onClick, children }) {
+function MiniKPI({
+  label,
+  value,
+  detail,
+}) {
   return (
-    <section className="panel-card">
-      <div className="panel-card-header">
-        <div>
-          <div className="card-eyebrow">{eyebrow}</div>
-          <h3>{title}</h3>
-        </div>
-
-        <button className="text-button" onClick={onClick}>
-          {button}
-        </button>
+    <div className="mini-kpi">
+      <div className="mini-kpi-label">
+        {label}
       </div>
+
+      <div className="mini-kpi-value">
+        {value}
+      </div>
+
+      <div className="mini-kpi-detail">
+        {detail}
+      </div>
+    </div>
+  );
+}
+
+function PageHeader({
+  eyebrow,
+  title,
+  description,
+}) {
+  return (
+    <div className="page-header">
+      <div className="card-eyebrow">
+        {eyebrow}
+      </div>
+
+      <h1>
+        {title}
+      </h1>
+
+      <p>
+        {description}
+      </p>
+    </div>
+  );
+}
+
+function PageSection({
+  eyebrow,
+  title,
+  children,
+}) {
+  return (
+    <section className="page-section">
+      {eyebrow && (
+        <div className="card-eyebrow">
+          {eyebrow}
+        </div>
+      )}
+
+      {title && (
+        <h2>
+          {title}
+        </h2>
+      )}
 
       {children}
     </section>
   );
 }
 
-function MiniKPI({ label, value, meta }) {
+/* =========================================================
+   SIGNALS PAGE
+========================================================= */
+
+function SignalsPage({
+  signals,
+  onNavigate,
+}) {
   return (
-    <div className="kpi-card">
-      <div className="kpi-label">{label}</div>
-      <div className="kpi-value">{value}</div>
-      <div className="kpi-meta">{meta}</div>
+    <div className="page">
+      <PageHeader
+        eyebrow="SIGNALS"
+        title="Operating Signals"
+        description="ActionMate AI continuously watches the signals that can change merchant operations, customer experience and sales performance."
+      />
+
+      <div className="page-stat-grid">
+        <MiniKPI
+          label="ACTIVE"
+          value="03"
+          detail="Signals requiring attention"
+        />
+
+        <MiniKPI
+          label="HIGH PRIORITY"
+          value="02"
+          detail="Immediate operational relevance"
+        />
+
+        <MiniKPI
+          label="CORRELATED"
+          value="02"
+          detail="Signals used in current decision"
+        />
+      </div>
+
+      <PageSection
+        eyebrow="DETECTION STREAM"
+        title="Current operating signals"
+      >
+        <div className="signal-list">
+          {signals.map((signal) => (
+            <SignalRow
+              key={signal.title}
+              {...signal}
+            />
+          ))}
+        </div>
+      </PageSection>
+
+      <PageSection
+        eyebrow="NEXT STEP"
+        title="From signals to decisions"
+      >
+        <p className="card-description">
+          ActionMate AI does not stop at detection.
+          Correlated signals become decision context
+          and can enter the governed action queue.
+        </p>
+
+        <div className="decision-actions">
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() =>
+              onNavigate("command")
+            }
+          >
+            Open Command Center
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() =>
+              onNavigate("actions")
+            }
+          >
+            View Action Queue
+          </button>
+        </div>
+      </PageSection>
     </div>
   );
 }
 
-function GovernanceItem({ number, title, text }) {
-  return (
-    <div className="governance-item">
-      <div className="governance-number">{number}</div>
+/* =========================================================
+   ACTION QUEUE PAGE
+========================================================= */
 
-      <div>
-        <strong>{title}</strong>
-        <p>{text}</p>
+function ActionsPage({
+  actions,
+  onRunAction,
+  onNavigate,
+}) {
+  const firstAction = actions.find(
+    (action) => action.id === "ACT-7841"
+  );
+
+  const executable =
+    firstAction?.status === "READY";
+
+  return (
+    <div className="page">
+      <PageHeader
+        eyebrow="ACTION QUEUE"
+        title="Governed Action Queue"
+        description="Actions are selected from operating context and remain subject to their configured governance mode."
+      />
+
+      <PageSection
+        eyebrow="QUEUE"
+        title="Pending and completed actions"
+      >
+        <div className="action-list">
+          {actions.map((action) => (
+            <ActionRow
+              key={action.id}
+              action={action}
+            />
+          ))}
+        </div>
+      </PageSection>
+
+      <PageSection
+        eyebrow="PRIMARY ACTION"
+        title="ACT-7841"
+      >
+        <div className="approval-page-card">
+          <div>
+            <div className="approval-action-id">
+              ACT-7841
+            </div>
+
+            <strong>
+              Address payment failure + notify merchant
+            </strong>
+
+            <p>
+              This action addresses the strongest
+              correlated operating signal from the
+              current decision workflow.
+            </p>
+
+            <div className="approval-details">
+              <span>
+                Merchant Operations
+              </span>
+
+              <span>
+                Approval required
+              </span>
+
+              <span>
+                91% confidence
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => {
+              if (executable) {
+                onNavigate("approvals");
+              } else {
+                onRunAction();
+              }
+            }}
+          >
+            {executable
+              ? "Review Approval"
+              : "Open Workflow"}
+          </button>
+        </div>
+      </PageSection>
+    </div>
+  );
+}
+
+/* =========================================================
+   APPROVALS PAGE
+========================================================= */
+
+function ApprovalsPage({
+  approvalRequired,
+  approved,
+  actionExecuted,
+  onApprove,
+  onRunAction,
+  onSimulate,
+}) {
+  return (
+    <div className="page">
+      <PageHeader
+        eyebrow="APPROVALS"
+        title="Human Governance"
+        description="ActionMate AI pauses important operational decisions so a human can review and authorize execution."
+      />
+
+      <div className="governance-banner">
+        <div>
+          <div className="card-eyebrow">
+            GOVERNANCE CONTROL
+          </div>
+
+          <strong>
+            Human oversight is enabled
+          </strong>
+
+          <p>
+            Approval is required for high-impact
+            operational actions.
+          </p>
+        </div>
+
+        <span className="governance-enabled">
+          ENABLED
+        </span>
+      </div>
+
+      <PageSection
+        eyebrow="PENDING REVIEW"
+        title="ACT-7841"
+      >
+        <div className="approval-page-card">
+          <div>
+            <div className="approval-action-id">
+              ACT-7841
+            </div>
+
+            <strong>
+              Address payment failure + notify merchant
+            </strong>
+
+            <p>
+              Resolve the detected payment issue and
+              notify the merchant after the approved
+              operational workflow is executed.
+            </p>
+
+            <div className="approval-details">
+              <span>
+                HIGH PRIORITY
+              </span>
+
+              <span>
+                91% CONFIDENCE
+              </span>
+
+              <span>
+                MERCHANT OPERATIONS
+              </span>
+            </div>
+          </div>
+
+          {actionExecuted ? (
+            <span className="success-badge">
+              EXECUTED
+            </span>
+          ) : approved ? (
+            <button
+              type="button"
+              className="primary-button"
+              onClick={onRunAction}
+            >
+              Execute Action
+            </button>
+          ) : approvalRequired ? (
+            <button
+              type="button"
+              className="primary-button"
+              onClick={onApprove}
+            >
+              Approve Action
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={onSimulate}
+            >
+              Start AI Workflow
+            </button>
+          )}
+        </div>
+      </PageSection>
+
+      <div className="approval-policy-grid">
+        <GovernanceItem
+          title="AUTO"
+          text="Routine, low-risk actions can execute without manual approval."
+        />
+
+        <GovernanceItem
+          title="APPROVAL"
+          text="Important actions pause until an authorized human approves."
+          active
+        />
+
+        <GovernanceItem
+          title="ESCALATE"
+          text="Sensitive or ambiguous cases are routed to expert review."
+        />
       </div>
     </div>
   );
 }
 
-function SignalsPage({ signals, onBack }) {
-  return (
-    <>
-      <PageHeader
-        eyebrow="SIGNAL MONITORING"
-        title="Operational Signals"
-        description="Monitor business signals that may require AI-assisted action."
-        onBack={onBack}
-      />
-
-      <section className="page-section-content">
-        <div className="section-kpis">
-          <MiniKPI label="ACTIVE SIGNALS" value="04" meta="2 new today" />
-          <MiniKPI label="HIGH PRIORITY" value="02" meta="Require attention" />
-          <MiniKPI label="MONITORED AREAS" value="06" meta="Across operations" />
-        </div>
-
-        <div className="table-card">
-          <div className="table-header">
-            <span>Signal</span>
-            <span>Description</span>
-            <span>Priority</span>
-            <span>Detected</span>
-          </div>
-
-          {signals.map((signal) => (
-            <div className="table-row" key={signal.title}>
-              <strong>{signal.title}</strong>
-              <span>{signal.description}</span>
-              <span className={`priority-text ${signal.priority.toLowerCase()}`}>
-                {signal.priority}
-              </span>
-              <span>{signal.time}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  );
-}
-
-function ActionsPage({ actions, onBack, onExecute }) {
-  return (
-    <>
-      <PageHeader
-        eyebrow="ACTION ORCHESTRATION"
-        title="Action Queue"
-        description="Review, authorize and track AI-generated operational actions."
-        onBack={onBack}
-      />
-
-      <section className="page-section-content">
-        <div className="action-banner">
-          <div>
-            <div className="card-eyebrow">AI OPERATIONS</div>
-            <h2>Next-best actions</h2>
-            <p>
-              Every recommendation is assigned an execution policy before work
-              is performed.
-            </p>
-          </div>
-        </div>
-
-        <div className="action-grid">
-          {actions.map((action) => (
-            <div className="large-action-card" key={action.id}>
-              <div className="action-card-top">
-                <span className="action-id">{action.id}</span>
-                <span className="mode-pill">{action.mode}</span>
-              </div>
-
-              <h3>{action.title}</h3>
-
-              <p>{action.category}</p>
-
-              <div className="action-card-bottom">
-                <span
-                  className={`state-pill ${
-                    action.status === "Executed" ? "success" : "ready"
-                  }`}
-                >
-                  {action.status}
-                </span>
-
-                {action.status === "Ready" && (
-                  <button className="text-button" onClick={onExecute}>
-                    Review →
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  );
-}
-
-function ApprovalsPage({
-  approvalRequired,
-  approved,
-  onApprove,
-  onExecute,
-  onBack,
-}) {
-  return (
-    <>
-      <PageHeader
-        eyebrow="HUMAN OVERSIGHT"
-        title="Approvals"
-        description="Keep people in control of important operational decisions."
-        onBack={onBack}
-      />
-
-      <section className="page-section-content">
-        <div className="approval-layout">
-          <div className="approval-main">
-            <div className="approval-card featured">
-              <div className="approval-status">
-                {approved
-                  ? "APPROVED"
-                  : approvalRequired
-                  ? "AWAITING APPROVAL"
-                  : "READY"}
-              </div>
-
-              <div className="card-eyebrow">ACT-7841 · PAYMENT RECOVERY</div>
-
-              <h2>Address payment failure + notify merchant</h2>
-
-              <p>
-                ActionMate identified a relationship between increased payment
-                failures and the observed sales decline.
-              </p>
-
-              <div className="approval-details">
-                <div>
-                  <span>Confidence</span>
-                  <strong>94%</strong>
-                </div>
-
-                <div>
-                  <span>Priority</span>
-                  <strong>High</strong>
-                </div>
-
-                <div>
-                  <span>Policy</span>
-                  <strong>Human approval</strong>
-                </div>
-              </div>
-
-              <div className="approval-buttons">
-                {!approved && (
-                  <button className="primary-button" onClick={onApprove}>
-                    Approve Action
-                  </button>
-                )}
-
-                {approved && (
-                  <button className="primary-button" onClick={onExecute}>
-                    Execute Approved Action
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="governance-card">
-            <div className="card-eyebrow">GOVERNANCE</div>
-
-            <h3>Human + AI</h3>
-
-            <GovernanceItem
-              number="01"
-              title="AUTO"
-              text="Routine, low-risk operational work."
-            />
-
-            <GovernanceItem
-              number="02"
-              title="APPROVAL"
-              text="Important decisions require authorization."
-            />
-
-            <GovernanceItem
-              number="03"
-              title="ESCALATE"
-              text="Sensitive cases move to expert teams."
-            />
-          </div>
-        </div>
-      </section>
-    </>
-  );
-}
+/* =========================================================
+   DATA INTELLIGENCE
+========================================================= */
 
 function DataIntelligencePage({
   fileName,
   fileStatus,
   onUpload,
-  onBack,
 }) {
   return (
-    <>
+    <div className="page">
       <PageHeader
         eyebrow="DATA INTELLIGENCE"
-        title="Operational Data"
-        description="Provide synthetic or anonymized data for AI-assisted operational analysis."
-        onBack={onBack}
+        title="Data Intelligence"
+        description="Upload a synthetic CSV or JSON dataset here to demonstrate how raw operational data becomes structured intelligence."
       />
 
-      <section className="page-section-content">
-        <div className="analyzer-layout">
-          <div className="upload-card">
-            <div className="upload-icon">+</div>
-
-            <div className="card-eyebrow">DATASET INPUT</div>
-
-            <h2>Upload operational data</h2>
-
-            <p>
-              Add a CSV or JSON dataset containing synthetic or anonymized
-              business information.
-            </p>
-
-            <label className="upload-button">
-              Choose CSV / JSON
-              <input
-                className="upload-input"
-                type="file"
-                accept=".csv,.json"
-                onChange={onUpload}
-              />
-            </label>
-
-            {fileName && (
-              <div className="selected-file">
-                <strong>{fileName}</strong>
-                <span>{fileStatus}</span>
-              </div>
-            )}
-
-            {!fileName && fileStatus && (
-              <div className="selected-file">
-                <span>{fileStatus}</span>
-              </div>
-            )}
+      <div className="data-intelligence-grid">
+        <section className="data-upload-card">
+          <div className="card-eyebrow">
+            DATA INPUT
           </div>
 
-          <div className="intelligence-results">
-            <div className="result-card">
-              <div className="card-eyebrow">ANALYSIS PREVIEW</div>
+          <h2>
+            Upload operating data
+          </h2>
 
-              <h3>Signals ActionMate can surface</h3>
+          <p>
+            Add a CSV or JSON dataset to simulate the
+            intelligence layer behind ActionMate AI.
+            Dataset upload is intentionally isolated to
+            this workspace.
+          </p>
 
-              <div className="analysis-preview">
-                <div>
-                  <strong>Payment friction</strong>
-                  <span>Failure patterns above baseline</span>
-                </div>
+          <label className="upload-button">
+            Choose dataset
 
-                <div>
-                  <strong>Merchant follow-up</strong>
-                  <span>Unresolved interactions detected</span>
-                </div>
+            <input
+              type="file"
+              accept=".csv,.json,text/csv,application/json"
+              onChange={onUpload}
+            />
+          </label>
 
-                <div>
-                  <strong>Behavior shift</strong>
-                  <span>Recent activity differs from baseline</span>
-                </div>
-              </div>
+          {fileName && (
+            <div className="uploaded-file">
+              <strong>
+                {fileName}
+              </strong>
+
+              <span>
+                {fileStatus ||
+                  "Ready for intelligence processing."}
+              </span>
             </div>
+          )}
+
+          {!fileName && fileStatus && (
+            <div className="upload-error">
+              {fileStatus}
+            </div>
+          )}
+        </section>
+
+        <section className="data-overview-card">
+          <div className="card-eyebrow">
+            INTELLIGENCE PIPELINE
           </div>
+
+          <h2>
+            From data to action
+          </h2>
+
+          <div className="data-flow">
+            <DataFlowStep
+              number="01"
+              title="INGEST"
+              text="Read transaction and operating records."
+            />
+
+            <DataFlowStep
+              number="02"
+              title="ANALYZE"
+              text="Detect deviations and relevant patterns."
+            />
+
+            <DataFlowStep
+              number="03"
+              title="DECIDE"
+              text="Generate a contextual next-best action."
+            />
+
+            <DataFlowStep
+              number="04"
+              title="MEASURE"
+              text="Track execution and business outcomes."
+            />
+          </div>
+        </section>
+      </div>
+
+      <div className="data-metrics-grid">
+        <MiniKPI
+          label="ROWS READY"
+          value="12.4K"
+          detail="Illustrative dataset"
+        />
+
+        <MiniKPI
+          label="SIGNALS"
+          value="03"
+          detail="Detected operating signals"
+        />
+
+        <MiniKPI
+          label="FEATURES"
+          value="18"
+          detail="Context variables"
+        />
+
+        <MiniKPI
+          label="QUALITY"
+          value="98%"
+          detail="Illustrative data quality"
+        />
+      </div>
+
+      <div className="data-note">
+        <div className="card-eyebrow">
+          PROTOTYPE NOTE
         </div>
-      </section>
-    </>
+
+        <strong>
+          Synthetic demonstration environment
+        </strong>
+
+        <p>
+          Uploaded files are used only to demonstrate
+          the data intelligence layer in this prototype.
+          No Paytm production data is connected.
+        </p>
+      </div>
+    </div>
   );
 }
 
-function ActivityPage({ activities, onBack }) {
+function DataFlowStep({
+  number,
+  title,
+  text,
+}) {
   return (
-    <>
-      <PageHeader
-        eyebrow="AUDIT TRAIL"
-        title="Activity"
-        description="Every AI decision and operational action is traceable."
-        onBack={onBack}
-      />
+    <div className="data-flow-step">
+      <strong>
+        {number}
+      </strong>
 
-      <section className="page-section-content">
-        <div className="timeline-card">
-          {activities.map((activity, index) => (
-            <div className="timeline-item" key={`${activity.time}-${index}`}>
-              <div className="timeline-time">{activity.time}</div>
+      <span>
+        {title}
+      </span>
 
-              <div className="timeline-marker">
-                <span />
-              </div>
-
-              <div className="timeline-content">
-                <div className="timeline-type">{activity.type}</div>
-
-                <strong>{activity.title}</strong>
-
-                <p>{activity.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
+      <p>
+        {text}
+      </p>
+    </div>
   );
 }
 
-function OutcomesPage({ outcomeRecorded, outcomesCount, onBack }) {
+/* =========================================================
+   ACTIVITY
+========================================================= */
+
+function ActivityPage({
+  activities,
+}) {
+  const aiEvents = activities.filter(
+    (item) =>
+      item.text
+        .toLowerCase()
+        .includes("ai")
+  ).length;
+
   return (
-    <>
+    <div className="page">
       <PageHeader
-        eyebrow="OUTCOME MEASUREMENT"
-        title="Outcomes"
-        description="Measure what happens after ActionMate takes action."
-        onBack={onBack}
+        eyebrow="ACTIVITY"
+        title="AI Activity Log"
+        description="A chronological record of decisions, approvals, executions and operator interactions."
       />
 
-      <section className="page-section-content">
-        <div className="outcome-grid">
-          <div className="outcome-card">
-            <div className="card-eyebrow">OUTCOMES TRACKED</div>
-            <strong>{outcomesCount}</strong>
-            <span>Every action traceable</span>
-          </div>
+      <div className="activity-summary">
+        <MiniKPI
+          label="EVENTS"
+          value={String(
+            activities.length
+          ).padStart(2, "0")}
+          detail="Recorded in this session"
+        />
 
-          <div className="outcome-card">
-            <div className="card-eyebrow">RESPONSE TIME</div>
-            <strong>70%</strong>
-            <span>Illustrative pilot target</span>
-          </div>
+        <MiniKPI
+          label="AI EVENTS"
+          value={String(
+            aiEvents
+          ).padStart(2, "0")}
+          detail="Generated by teammate"
+        />
 
-          <div className="outcome-card">
-            <div className="card-eyebrow">MISSED FOLLOW-UPS</div>
-            <strong>-30%</strong>
-            <span>Illustrative pilot target</span>
-          </div>
-        </div>
+        <MiniKPI
+          label="GOVERNANCE"
+          value="ON"
+          detail="Human oversight active"
+        />
+      </div>
 
-        <div className="outcome-panel">
+      <div className="activity-list">
+        <div className="list-heading">
           <div>
-            <div className="card-eyebrow">MEASUREMENT LOOP</div>
+            <div className="card-eyebrow">
+              EVENT STREAM
+            </div>
+
+            <h3>
+              Recent activity
+            </h3>
+          </div>
+
+          <span className="list-status">
+            LIVE
+          </span>
+        </div>
+
+        {activities.map(
+          (activity, index) => (
+            <div
+              className="activity-row"
+              key={`${activity.text}-${index}`}
+            >
+              <span className="activity-dot"></span>
+
+              <div>
+                <strong>
+                  {activity.text}
+                </strong>
+
+                <span>
+                  {activity.time}
+                </span>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   OUTCOMES
+========================================================= */
+
+function OutcomesPage({
+  outcomeRecorded,
+  executedCount,
+  outcomesCount,
+  outcomeMessage,
+}) {
+  return (
+    <div className="page">
+      <PageHeader
+        eyebrow="OUTCOMES"
+        title="Outcome Measurement"
+        description="ActionMate AI closes the loop by measuring what happened after an approved action was executed."
+      />
+
+      <div className="outcome-grid">
+        <OutcomeMetric
+          label="ACTIONS EXECUTED"
+          value={String(
+            executedCount
+          ).padStart(2, "0")}
+          text="Approved actions completed in this session."
+        />
+
+        <OutcomeMetric
+          label="OUTCOMES TRACKED"
+          value={String(
+            outcomesCount
+          ).padStart(2, "0")}
+          text="Completed actions with measurement started."
+        />
+
+        <OutcomeMetric
+          label="RESPONSE TARGET"
+          value="< 5m"
+          text="Illustrative operational response target."
+        />
+
+        <OutcomeMetric
+          label="MEASUREMENT"
+          value={
+            outcomeRecorded
+              ? "LIVE"
+              : "READY"
+          }
+          text="Outcome telemetry for the current action."
+        />
+      </div>
+
+      <section className="outcome-card">
+        <div className="outcome-header">
+          <div>
+            <div className="card-eyebrow">
+              CURRENT OUTCOME
+            </div>
 
             <h2>
-              {outcomeRecorded
-                ? "Action outcome is now being tracked."
-                : "Every action becomes measurable."}
+              ACT-7841 — Merchant payment recovery
             </h2>
 
             <p>
-              ActionMate connects execution back to business outcomes so teams
-              can understand whether an intervention created measurable impact.
+              {outcomeMessage}
             </p>
           </div>
 
-          <div className="measurement-loop">
-            <span>Signal</span>
-            <b>→</b>
-            <span>Decision</span>
-            <b>→</b>
-            <span>Action</span>
-            <b>→</b>
-            <span>Outcome</span>
-          </div>
+          <span
+            className={`outcome-status ${
+              outcomeRecorded
+                ? "active"
+                : ""
+            }`}
+          >
+            {outcomeRecorded
+              ? "TRACKING ACTIVE"
+              : "AWAITING EXECUTION"}
+          </span>
         </div>
       </section>
-    </>
+
+      <div className="data-note">
+        <div className="card-eyebrow">
+          MEASUREMENT PRINCIPLE
+        </div>
+
+        <strong>
+          Success is measured in outcomes, not conversations.
+        </strong>
+
+        <p>
+          The prototype records execution first and
+          then begins an outcome measurement state,
+          demonstrating the closed-loop AI teammate model.
+        </p>
+      </div>
+    </div>
   );
 }
 
-function PageHeader({ eyebrow, title, description, onBack }) {
+function OutcomeMetric({
+  label,
+  value,
+  text,
+}) {
   return (
-    <section className="page-header">
-      <div>
-        <div className="eyebrow">{eyebrow}</div>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </div>
+    <div className="outcome-metric">
+      <span>
+        {label}
+      </span>
 
-      <button className="secondary-button" onClick={onBack}>
-        Back to Command Center
-      </button>
-    </section>
+      <strong>
+        {value}
+      </strong>
+
+      <p>
+        {text}
+      </p>
+    </div>
   );
 }
 
